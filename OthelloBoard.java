@@ -7,7 +7,7 @@ import java.util.Iterator;
 public class OthelloBoard {
 
 	private enum Direction {
-		UP,DOWN,LEFT,RIGHT,UPLEFT,UPRIGHT,DOWNLEFT,DOWNRIGHT;
+		RIGHT,UPRIGHT,UP,UPLEFT,LEFT,DOWNLEFT,DOWN,DOWNRIGHT;
 	}
 	
 	private OthelloPiece[][] board;
