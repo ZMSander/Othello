@@ -30,4 +30,13 @@ public class Coordinate {
 		this.y = y;
 	}
 	
+	public boolean equals(Object other){
+		if((other == null) || (getClass() != other.getClass())){
+			return false;
+		}
+		else{
+			Coordinate otherCoordinate = (Coordinate)other;
+			return (x == otherCoordinate.getX() && y == otherCoordinate.getY());
+		}
+	}
 }

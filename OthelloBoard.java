@@ -24,6 +24,14 @@ public class OthelloBoard {
 		activePlayer = OthelloPiece.BLACK;
 	}
 	
+	public OthelloPiece getSquare(int r, int c){
+		return board[r][c];
+	}
+	
+	public OthelloPiece getSquare(Coordinate c){
+		return board[c.getX()][c.getY()];
+	}
+	
 	/**
 	 * 
 	 * @param c column the piece is to be place in
@@ -69,9 +77,16 @@ public class OthelloBoard {
 	 */
 	public ArrayList<Coordinate> findFlippablePieces(int c, int r){
 		ArrayList<Coordinate> flippablePieces = new ArrayList<Coordinate>();
+		// If we try to place the piece on an occupied square, it is not a valid move
+		if (board[c][r] != null){
+			return flippablePieces;
+		}
 		for (Direction d : Direction.values()){
-			//TODO This may through a null pointer exception. Deal with it.
-			flippablePieces.addAll(findFlippableInDirection(c,r,d));
+			//TODO This may throw a null pointer exception. Deal with it.
+			ArrayList<Coordinate> dFlipable = findFlippableInDirection(c, r, d);
+			if (!dFlipable.isEmpty()){
+				flippablePieces.addAll(dFlipable);
+			}
 		}		
 		return flippablePieces;
 	}
@@ -80,26 +95,34 @@ public class OthelloBoard {
 		int xOff;
 		int yOff;
 		switch(d){
-		case RIGHT: xOff = 1; yOff = 0;
-		case UPRIGHT: xOff = 1; yOff = 1;
-		case UP: xOff = 0; yOff = 1;
-		case UPLEFT: xOff = -1; yOff = 1;
-		case LEFT: xOff = -1; yOff = 0;
-		case DOWNLEFT: xOff = -1; yOff = -1;
-		case DOWN: xOff = 0; yOff = -1;
-		case DOWNRIGHT: xOff = 1; yOff = -1;
+		case RIGHT: xOff = 1; yOff = 0; break;
+		case UPRIGHT: xOff = 1; yOff = -1; break;
+		case UP: xOff = 0; yOff = -1; break;
+		case UPLEFT: xOff = -1; yOff = -1; break;
+		case LEFT: xOff = -1; yOff = 0; break;
+		case DOWNLEFT: xOff = -1; yOff = 1; break;
+		case DOWN: xOff = 0; yOff = 1; break;
+		case DOWNRIGHT: xOff = 1; yOff = 1; break;
 		// This should never occur because all cases are covered.
 		default: xOff = 0; yOff = 0;
 		}
 		ArrayList<Coordinate> returnPieces = new ArrayList<Coordinate>();
-		int x = c+xOff;
-		int y = r+yOff;
 		
-		for (OthelloPiece nextPiece = board[x][y];nextPiece == activePlayer.opposite();x+=xOff, y=+yOff){
-			 returnPieces.add(new Coordinate(x,y));
+		// The location to check needs to exist
+		for (int x =c+xOff, y=r+yOff;(0<=x && x<8) && (0<=y &&y<8);x+=xOff, y+=yOff){
+			OthelloPiece nextPiece = board[x][y];
+			if(nextPiece == activePlayer.opposite()){
+				returnPieces.add(new Coordinate(x,y));
+			}
+			else if (nextPiece == activePlayer && !returnPieces.isEmpty()){
+				return returnPieces;
+			}
+			else {
+				break;
+			}
 		}
-		
-		return returnPieces;
+		// There are no pieces to return, so return an empty list
+		return new ArrayList<Coordinate>();
 	}
 	
 	/**
