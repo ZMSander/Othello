@@ -1,31 +1,27 @@
 package othello;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-import othello.OthelloBoard.Piece;
 
 public class OthelloBoard {
 
-	private enum Piece {
-		WHITE, BLACK;
-		public Piece opposite(){
-			switch(this){
-			case WHITE: return BLACK;
-			case BLACK: return WHITE;
-			}
-		}
+	private enum Direction {
+		UP,DOWN,LEFT,RIGHT,UPLEFT,UPRIGHT,DOWNLEFT,DOWNRIGHT;
 	}
 	
-	private Piece[][] board;
-	private Piece activePlayer;
+	private OthelloPiece[][] board;
+	// Active player is used to define which players turn it is
+	private OthelloPiece activePlayer;
 	
+	// Create an Othello Board with the default layout. Black always moves first.
 	public OthelloBoard(){
-		this.board = new Piece[8][8];
-		board[3][3] = Piece.WHITE;
-		board[4][4]	= Piece.WHITE;
-		board[3][4] = Piece.BLACK;
-		board[4][3]	= Piece.BLACK;
-		activePlayer = Piece.BLACK;
+		this.board = new OthelloPiece[8][8];
+		board[3][3] = OthelloPiece.WHITE;
+		board[4][4]	= OthelloPiece.WHITE;
+		board[3][4] = OthelloPiece.BLACK;
+		board[4][3]	= OthelloPiece.BLACK;
+		activePlayer = OthelloPiece.BLACK;
 	}
 	
 	/**
@@ -35,14 +31,18 @@ public class OthelloBoard {
 	 * @return	if a piece was placed
 	 */
 	public boolean placePiece(int c, int r){
-		ArrayList<Piece[][]> flip = findFlippablePieces(c,r);
-		if (flip != null){
-			for (int i = 0; flip.get(i) != null; i++){
-				board[flip.get(i)][flip.get(i)] = activePlayer;
+		ArrayList<Coordinate> flip = findFlippablePieces(c,r);
+		//TODO Refactor code so that an emptylist is an invalid move,
+		// and never have a null here.
+		if (flip != null && !flip.isEmpty()){
+			board[c][r] = activePlayer;
+			Iterator<Coordinate> flipIter = flip.iterator();
+			while (flipIter.hasNext()){
+				board[flipIter.next().getX()][flipIter.next().getY()] = activePlayer;
 			}
+			//TODO Should the switch active player method check if there is a valid move?
 			switchActivePlayer();
 			return true;
-			this.board[x][y] = activePlayer;
 		}
 		else
 			return false;
@@ -54,8 +54,8 @@ public class OthelloBoard {
 	 * @return a list of pieces to flip. If the returned list is empty, the move is invalid
 	 */
 	public boolean checkValidPlacement(int c, int r){
-		ArrayList<Piece[][]> flippablePieces = new ArrayList<Piece[][]>();
-		Piece nextPiece = board[c+1][r];
+		ArrayList<OthelloPiece[][]> flippablePieces = new ArrayList<OthelloPiece[][]>();
+		OthelloPiece nextPiece = board[c+1][r];
 		while(nextPiece == activePlayer.opposite()){
 			
 		}
@@ -67,41 +67,39 @@ public class OthelloBoard {
 	 * Determine if the placement
 	 * @return A list of pieces to flip. If the returned list is empty, the move is invalid
 	 */
-	public ArrayList<Piece[][]> findFlippablePieces(int c, int r){
-		ArrayList<Piece[][]> flippablePieces = new ArrayList<Piece[][]>();
+	public ArrayList<Coordinate> findFlippablePieces(int c, int r){
+		ArrayList<Coordinate> flippablePieces = new ArrayList<Coordinate>();
+		for (Direction d : Direction.values()){
+			//TODO This may through a null pointer exception. Deal with it.
+			flippablePieces.addAll(findFlippableInDirection(c,r,d));
+		}		
+		return flippablePieces;
+	}
+	
+	private ArrayList<Coordinate> findFlippableInDirection(int c, int r, Direction d){
+		int xOff;
+		int yOff;
+		switch(d){
+		case RIGHT: xOff = 1; yOff = 0;
+		case UPRIGHT: xOff = 1; yOff = 1;
+		case UP: xOff = 0; yOff = 1;
+		case UPLEFT: xOff = -1; yOff = 1;
+		case LEFT: xOff = -1; yOff = 0;
+		case DOWNLEFT: xOff = -1; yOff = -1;
+		case DOWN: xOff = 0; yOff = -1;
+		case DOWNRIGHT: xOff = 1; yOff = -1;
+		// This should never occur because all cases are covered.
+		default: xOff = 0; yOff = 0;
+		}
+		ArrayList<Coordinate> returnPieces = new ArrayList<Coordinate>();
+		int x = c+xOff;
+		int y = r+yOff;
 		
-		int x = c++;
-		int y = r;
-		
-		// Check the right horizontal
-		Piece nextPiece = board[c+1][r];
-		while(nextPiece == activePlayer.opposite()){
-			
-			nextPiece = board[c++][r];
+		for (OthelloPiece nextPiece = board[x][y];nextPiece == activePlayer.opposite();x+=xOff, y=+yOff){
+			 returnPieces.add(new Coordinate(x,y));
 		}
 		
-		// Check the up-right diagonal
-		nextPiece = board[c+1][r-1];
-		
-		// Check the upper vertical
-		nextPiece = board[c][r-1];
-		
-		// Check the up-left diagonal
-		nextPiece = board[c-1][r-1];
-		
-		// Check the left horizontal
-		nextPiece = board[c-1][r];
-		
-		// Check the down-left diagonal
-		nextPiece = board[c-1][r+1];
-		
-		// Check the lower vertical
-		nextPiece = board[c][r+1];
-		
-		// Check the down-right diagonal
-		nextPiece = board[c][r+1];
-		
-		return flippablePieces;
+		return returnPieces;
 	}
 	
 	/**
@@ -110,10 +108,10 @@ public class OthelloBoard {
 	 * and false if the active player does not.
 	 * @return 	if the active player has a valid move
 	 */
-	public boolean HasMove(){
+	public boolean HasMove(OthelloPiece player){
 		//TODO: Make this cleaner so it doesn't have to check every single space until it finds a working one.
-		for (int r = 0;;r++){
-			for (int c = 0;;c++){
+		for (int r = 0;r<8;r++){
+			for (int c = 0;c<8;c++){
 				if (checkValidPlacement(r,c)){
 					return true;
 				}
@@ -126,7 +124,16 @@ public class OthelloBoard {
 	 * Switch the active player
 	 */
 	public void switchActivePlayer(){
-		activePlayer = activePlayer.opposite();
+		//TODO Should this code actually be in the GUI? Does the board care?
+		if (HasMove(activePlayer.opposite())){
+			activePlayer = activePlayer.opposite();
+			}
+		else if (!HasMove(activePlayer)){
+			endGame();
+		}
+	}
+	
+	public void endGame(){
 		
 	}
 	
