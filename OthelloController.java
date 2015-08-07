@@ -1,10 +1,13 @@
 package othello;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 
 public class OthelloController {
+	//TODO Should this not be a mouselistener if we only want one of its method?
 	private class BoardMouseListener implements MouseListener{
 
 		public void mouseClicked(MouseEvent e) {
@@ -20,27 +23,21 @@ public class OthelloController {
 				//TODO Present to the player that the move was invalid
 			}
 		}
-
 		//Don't care
-		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-		
+		public void mouseEntered(MouseEvent e) {}		
 		//Don't care
-		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
+		public void mouseExited(MouseEvent e) {}
 		//Don't care
-		public void mousePressed(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
+		public void mousePressed(MouseEvent e) {}
 		//Don't care
-		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
-			
+		public void mouseReleased(MouseEvent e) {}
+	}
+	
+	private class PassButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			if (othelloModel.passTurnWithoutMoving()){
+				othelloView.changeTurn();
+			}
 		}
 	}
 	
@@ -48,8 +45,10 @@ public class OthelloController {
 	private OthelloBoard othelloModel;
 	
 	public OthelloController(OthelloWindow	window, OthelloBoard board){
-		BoardMouseListener mouseListener = new BoardMouseListener();
-		window.getBoardPanel().addMouseListener(mouseListener);
+		BoardMouseListener boardListener = new BoardMouseListener();
+		window.getBoardPanel().addMouseListener(boardListener);
+		PassButtonListener passButtonListener = new PassButtonListener();
+		window.getPassButton().addActionListener(passButtonListener);
 		othelloView = window;
 		othelloModel = board;
 	}

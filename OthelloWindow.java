@@ -42,6 +42,7 @@ public class OthelloWindow extends JFrame{
 		menuBar.setPreferredSize(new Dimension(500,20));
 		setJMenuBar(menuBar);
 		
+		
 		//Set the Content Pane
 		contentPane = new JPanel(new BorderLayout());
 		contentPane.setPreferredSize(new Dimension(600,400));
@@ -73,6 +74,10 @@ public class OthelloWindow extends JFrame{
 	
 	public OthelloBoardPanel getBoardPanel() {
 		return boardPanel;
+	}
+	
+	public JButton getPassButton(){
+		return passButton;
 	}
 	
 	public void changeTurn(){

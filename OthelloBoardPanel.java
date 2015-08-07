@@ -48,9 +48,6 @@ public class OthelloBoardPanel extends JPanel {
 		
 		int width = this.getWidth();
 		int height = this.getHeight();
-		
-		//Test Code
-		pieces.add(new Coordinate(4,4));
 
 		Graphics2D g2d = (Graphics2D) g;
 		for (int r = 0; r<8; r++){

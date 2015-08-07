@@ -241,6 +241,24 @@ public class OthelloBoard {
 		}
 	}
 	
+	/**
+	 * Check if the active player has a move. If so, return false and do nothing.
+	 * If the player does not have a valid move, check if the other player does.
+	 * If he does, pass the turn and return true. If he does not, no player can move,
+	 * so end the game.
+	 */
+	public boolean passTurnWithoutMoving(){
+		if (hasMove(activePlayer)){
+			return false;
+			}
+		else if (hasMove(activePlayer.opposite())){
+			activePlayer = activePlayer.opposite();
+			return true;
+		}
+		endGame();
+		return false;
+	}
+	
 	public void endGame(){
 		
 	}
